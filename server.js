@@ -51,4 +51,26 @@ const server = require('http').createServer((req, res) => {
     });
 
   } else if (req.method === 'GET' && req.url === '/dnp-list') {
-    const fileId = '102VBqh1MAzu8ephgK_3gAXKt7D0en8
+    const fileId = '102VBqh1MAzu8ephgK_3gAXKt7D0en8Fh';
+    const driveUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    https.get(driveUrl, (driveRes) => {
+      let data = '';
+      driveRes.on('data', chunk => data += chunk);
+      driveRes.on('end', () => {
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.end(data);
+      });
+    }).on('error', (e) => {
+      res.writeHead(500);
+      res.end(JSON.stringify({ error: e.message }));
+    });
+
+  } else {
+    res.writeHead(404);
+    res.end();
+  }
+});
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
