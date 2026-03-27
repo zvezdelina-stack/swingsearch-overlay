@@ -50,20 +50,36 @@ const server = require('http').createServer((req, res) => {
       }
     });
 
-  } else if (req.method === 'GET' && req.url === '/dnp-list') {
-    const fileId = '102VBqh1MAzu8ephgK_3gAXKt7D0en8Fh';
-    const driveUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-    https.get(driveUrl, (driveRes) => {
+} else if (req.method === 'GET' && req.url === '/dnp-list') {
+  const fileId = '102VBqh1MAzu8ephgK_3gAXKt7D0en8Fh';
+  const driveUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
+
+  https.get(driveUrl, (driveRes) => {
+    if (driveRes.statusCode === 302 || driveRes.statusCode === 301) {
+      const redirectUrl = driveRes.headers.location;
+      https.get(redirectUrl, (redirectRes) => {
+        let data = '';
+        redirectRes.on('data', chunk => data += chunk);
+        redirectRes.on('end', () => {
+          res.writeHead(200, { 'Content-Type': 'text/plain' });
+          res.end(data);
+        });
+      }).on('error', (e) => {
+        res.writeHead(500);
+        res.end(JSON.stringify({ error: e.message }));
+      });
+    } else {
       let data = '';
       driveRes.on('data', chunk => data += chunk);
       driveRes.on('end', () => {
         res.writeHead(200, { 'Content-Type': 'text/plain' });
         res.end(data);
       });
-    }).on('error', (e) => {
-      res.writeHead(500);
-      res.end(JSON.stringify({ error: e.message }));
-    });
+    }
+  }).on('error', (e) => {
+    res.writeHead(500);
+    res.end(JSON.stringify({ error: e.message }));
+  });
 
   } else {
     res.writeHead(404);
