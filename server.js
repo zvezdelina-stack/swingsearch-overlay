@@ -1,5 +1,7 @@
 // server.js
 const https = require('https');
+const fs = require('fs');
+const path = require('path');
 const PORT = process.env.PORT || 3000;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
@@ -50,30 +52,16 @@ const server = require('http').createServer((req, res) => {
       }
     });
 
-} else if (req.method === 'GET' && req.url === '/dnp-list') {
-  const fs = require('fs');
-  const path = require('path');
-  try {
-    const csvPath = path.join(__dirname, 'dnp.csv');
-    const data = fs.readFileSync(csvPath, 'utf8');
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end(data);
-  } catch (e) {
-    res.writeHead(500);
-    res.end(JSON.stringify({ error: 'Could not read DNP list' }));
-  }
-    } else {
-      let data = '';
-      driveRes.on('data', chunk => data += chunk);
-      driveRes.on('end', () => {
-        res.writeHead(200, { 'Content-Type': 'text/plain' });
-        res.end(data);
-      });
+  } else if (req.method === 'GET' && req.url === '/dnp-list') {
+    try {
+      const csvPath = path.join(__dirname, 'dnp.csv');
+      const data = fs.readFileSync(csvPath, 'utf8');
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end(data);
+    } catch (e) {
+      res.writeHead(500);
+      res.end(JSON.stringify({ error: 'Could not read DNP list' }));
     }
-  }).on('error', (e) => {
-    res.writeHead(500);
-    res.end(JSON.stringify({ error: e.message }));
-  });
 
   } else {
     res.writeHead(404);
