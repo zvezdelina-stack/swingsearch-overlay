@@ -51,23 +51,17 @@ const server = require('http').createServer((req, res) => {
     });
 
 } else if (req.method === 'GET' && req.url === '/dnp-list') {
-  const fileId = '102VBqh1MAzu8ephgK_3gAXKt7D0en8Fh';
-  const driveUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
-
-  https.get(driveUrl, (driveRes) => {
-    if (driveRes.statusCode === 302 || driveRes.statusCode === 301) {
-      const redirectUrl = driveRes.headers.location;
-      https.get(redirectUrl, (redirectRes) => {
-        let data = '';
-        redirectRes.on('data', chunk => data += chunk);
-        redirectRes.on('end', () => {
-          res.writeHead(200, { 'Content-Type': 'text/plain' });
-          res.end(data);
-        });
-      }).on('error', (e) => {
-        res.writeHead(500);
-        res.end(JSON.stringify({ error: e.message }));
-      });
+  const fs = require('fs');
+  const path = require('path');
+  try {
+    const csvPath = path.join(__dirname, 'dnp.csv');
+    const data = fs.readFileSync(csvPath, 'utf8');
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end(data);
+  } catch (e) {
+    res.writeHead(500);
+    res.end(JSON.stringify({ error: 'Could not read DNP list' }));
+  }
     } else {
       let data = '';
       driveRes.on('data', chunk => data += chunk);
