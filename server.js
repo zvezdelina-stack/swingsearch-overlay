@@ -36,6 +36,9 @@ const server = require('http').createServer((req, res) => {
           let data = '';
           apiRes.on('data', chunk => data += chunk);
           apiRes.on('end', () => {
+            if (apiRes.statusCode !== 200) {
+              console.log('Anthropic API error:', apiRes.statusCode, data);
+            }
             res.writeHead(apiRes.statusCode, { 'Content-Type': 'application/json' });
             res.end(data);
           });
