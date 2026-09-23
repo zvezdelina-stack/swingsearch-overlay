@@ -107,11 +107,11 @@ function queryDNPFromSalesforce() {
 
 function queryCompaniesFromSalesforce() {
   if (companiesCache && Date.now() < companiesCacheExpiry) return Promise.resolve(companiesCache);
-  return sfQuery("SELECT Name, Short_Description__c, industry_new__c, Latest_Funding_Round__c, Company_Revenue__c, Headcount__c, plaunch__LinkedIn__c, Do_Not_Poach__c, Do_not_Poach_End_Date__c, HQ__c, Website FROM Account WHERE plaunch__LinkedIn__c != null").then(function(records) {
+    return sfQuery("SELECT Name, Description, Short_Description__c, industry_new__c, Latest_Funding_Round__c, Company_Revenue__c, Headcount__c, plaunch__LinkedIn__c, Do_Not_Poach__c, Do_not_Poach_End_Date__c, HQ__c, Website FROM Account WHERE plaunch__LinkedIn__c != null").then(function(records) {
     var companies = records.map(function(r) {
       return {
         name: r.Name || '',
-        description: r.Short_Description__c || '',
+        description: r.Short_Description__c || r.Description || '',
         industry: r.industry_new__c || '',
         fundingRound: r.Latest_Funding_Round__c || '',
         revenue: r.Company_Revenue__c || null,
